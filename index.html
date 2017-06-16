@@ -1,1 +1,216 @@
-weather project
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="weather.css">
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+<script src="weather.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12 text-center">
+			<h1 id="location"></h1>
+			<p id="currentDate"></p>
+		</div>
+		<div class="row">
+			<div class="col-lg-12 text-center">
+				<img class="weather" id="currentWeather"/>
+				<p><span id="currentTemp"></span><span class="unit" id="celsius">&#8451;</span>
+				<span id="divider">/</span><span class="unit" id="fahrenheit">&#8457;</span></p>
+				<p id="maxMin"><span class="celsius" id="highC"></span><span class="fahr" id="highF"></span>
+				&nbsp<span class="celsius" id="lowC"></span><span class="fahr" id="lowF"></span></p>
+				<p id="description"></p>
+				<p id="otherIcons"><img src="images/wind_24.png"/>
+				<span id="currentWind"></span> | <img src="images/humidity.png"/>
+				<span id="currentHumidity"></span></p>
+			</div>
+		</div>
+		<div class="row" id="forecast">
+			<div class="col-lg-12 text-center">
+				<div class="row">
+				<div class="col-md-2 daily">
+					<p class="day" id="d1"></p>
+              		<img class="weather" id="weatherIcon1" width="100%" height="auto"/>
+              		<p class="temp"><span class="celsius" id="day1highC"></span><span class="fahr" id="day1highF"></span>
+              		&nbsp&nbsp&nbsp
+              		<span class="lowTemp celsius" id="day1lowC"></span><span class="lowTemp fahr" id="day1lowF"></span></p>
+				</div>
+				<div class="col-md-2 daily">
+					<p class="day" id="d2"></p>
+              		<img class="weather" id="weatherIcon2" width="100%" height="auto">
+              		<p class="temp"><span class="celsius" id="day2highC"></span><span class="fahr" id="day2highF"></span>
+              		&nbsp&nbsp&nbsp
+              		<span class="lowTemp celsius" id="day2lowC"></span><span class="lowTemp fahr" id="day2lowF"></span></p>
+				</div>
+				<div class="col-md-2 daily">
+					<p class="day" id="d3"></p>
+              		<img class="weather" id="weatherIcon3" width="100%" height="auto">
+              		<p class="temp"><span class="celsius" id="day3highC"></span><span class="fahr" id="day3highF"></span>
+              		&nbsp&nbsp&nbsp
+              		<span class="lowTemp celsius" id="day3lowC"></span><span class="lowTemp fahr" id="day3lowF"></span></p>
+              	</div>
+				<div class="col-md-2 daily">
+					<p class="day" id="d4"></p>
+              		<img class="weather" id="weatherIcon4" width="100%" height="auto">
+              		<p class="temp"><span class="celsius" id="day4highC"></span><span class="fahr" id="day4highF"></span>
+              		&nbsp&nbsp&nbsp
+              		<span class="lowTemp celsius" id="day4lowC"></span><span class="lowTemp fahr" id="day4lowF"></span></p>
+				</div>
+				<div class="col-md-2 daily">
+					<p class="day" id="d5"></p>
+              		<img class="weather" id="weatherIcon5" width="100%" height="auto">
+              		<p class="temp"><span class="celsius" id="day5highC"></span><span class="fahr" id="day5highF"></span>
+              		&nbsp&nbsp&nbsp
+              		<span class="lowTemp celsius" id="day5lowC"></span><span class="lowTemp fahr" id="day5lowF"></span></p>
+				</div>
+				<div class="col-md-2 daily">
+					<p class="day" id="d6"></p>
+              		<img class="weather" id="weatherIcon6" width="100%" height="auto">
+              		<p class="temp"><span class="celsius" id="day6highC"></span><span class="fahr" id="day6highF"></span>
+              		&nbsp&nbsp&nbsp
+              		<span class="lowTemp celsius" id="day6lowC"></span><span class="lowTemp fahr" id="day6lowF"></span></p>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-12 text-center">
+				<p id="credit">Weather icons by <a href="http://vclouds.deviantart.com/art/VClouds-Weather-Icons-179152045">VClouds</a></p>
+			</div>
+		</div>
+	</div>
+<script>
+
+//https://cors-anywhere.herokuapp.com/
+$(document).ready(function(){
+	var location = "http://ip-api.com/json";
+	var icon = {
+			"01d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548615/clear_veedxb.png",
+			"01n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548624/clear_night_l8auqv.png",
+			"02d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548687/mostly_sunny_p4w0ea.png",
+			"02n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548656/mostly_clear_ohl3bn.png",
+			"03d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497608234/partly_cloudy_svq0gr.png",
+			"03n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497608255/partly_cloudy_night_cmijxe.png",
+			"04d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548694/mostly_cloudy_zoqemw.png",
+			"04n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548700/mostly_cloudy_night_auhctf.png",
+			"09d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548887/heavy_rain_h3qvka.png",
+			"09n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548887/heavy_rain_h3qvka.png",
+			"10d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548632/rain_berklr.png",
+			"10n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548632/rain_berklr.png",
+			"11d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548720/t-storm_qh6ik9.png",
+			"11n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548720/t-storm_qh6ik9.png",
+			"13d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548922/light_snow_e7bmtt.png",
+			"13n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548922/light_snow_e7bmtt.png",
+			"50d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548602/fog_ivas6z.png",
+			"50n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548602/fog_ivas6z.png"	
+		};
+	$.ajax({
+		url:location,
+		dataType:'json',
+		async:false,
+		cache:false,
+		success:function(data){
+			var d = new Date();
+			var lat = data.lat;
+	    	var lon = data.lon;
+	    	var weather = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&appid=8d1dab70d6486ad4b46fe911084f46af";
+	    	var forecast = "http://api.openweathermap.org/data/2.5/forecast/daily?lat=" + lat + "&lon=" + lon + "&cnt=7&appid=8d1dab70d6486ad4b46fe911084f46af";
+	    	$("#location").html(data.city + ", " + data.countryCode);
+	    	$("#currentDate").html(d.toDateString());
+			$.ajax({
+	    		url:weather,
+	    		dataType:'json',
+	    		async:false,
+	    		cache:false,
+	    		success:function(conditions){
+	    			if (icon[conditions.weather[0].icon]){
+	        			$("#currentWeather").attr("src", icon[conditions.weather[0].icon]);
+	        		}
+	    			var kelvin = conditions.main.temp;
+	    			var kelvinMax = conditions.main.temp_max;
+	    			var kelvinMin = conditions.main.temp_min;
+	        		var celsius = Math.round(kelvin - 273);
+	        		var celsiusMax = Math.round(kelvinMax - 273);
+	        		var celsiusMin = Math.round(kelvinMin - 273);
+	       	 		var fahr = Math.round((kelvin)*(9/5)-459.67);
+	       	 		var fahrMax = Math.round((kelvinMax)*(9/5)-459.67);
+	       	 		var fahrMin = Math.round((kelvinMin)*(9/5)-459.67);
+	        		$("#fahrenheit").click(function(){
+	        			$("#currentTemp").html(fahr);
+	       	 			$("#fahrenheit").css("color", "black");
+	        			$("#celsius").css("color", "grey");
+		        		$(".celsius").hide();
+		        		$(".fahr").show();
+	        		});
+	        		$("#celsius").click(function(){
+	            		$("#currentTemp").html(celsius);
+	            		$("#celsius").css("color", "black");
+	           			$("#fahrenheit").css("color", "grey");
+		        		$(".celsius").show();
+		        		$(".fahr").hide();
+	        		});
+	        		$("#description").html(conditions.weather[0].description);
+	        		$("#currentWind").html(conditions.wind.speed + " mph");
+	        		$("#currentHumidity").html(conditions.main.humidity);
+	        		$("#currentTemp").html(celsius);
+	        		$("#highC").html("HIGH " + celsiusMax);
+	        		$("#highF").html("HIGH " + fahrMax).hide();
+	        		$("#lowC").html("LOW " + celsiusMin);
+	        		$("#lowF").html("LOW " + fahrMin).hide();
+	        		
+	    		}
+			});//end of first call
+			$.ajax({
+				url:forecast,
+				dataType: 'json',
+				async:false,
+				cache:false,
+				success: function(lookAhead){
+					var expected = lookAhead.list;
+					
+    				for (var i = 1; i < expected.length; i++) {
+    					var celsiusHigh = "#day" + i + "highC";
+    					var fahrHigh = "#day" + i + "highF";
+        				var celsiusLow = "#day" + i + "lowC";
+        				var fahrLow = "#day" + i + "lowF";
+        				var weatherIcon = "#weatherIcon" + i;
+        				var kelvinMax = expected[i].temp.max;
+        				var kelvinMin = expected[i].temp.min;
+        				celsiusMax = Math.round(kelvinMax - 273);
+            			var fahrMax = Math.round((kelvinMax)*(9/5)-459.67);
+            			var celsiusMin = Math.round(kelvinMin - 273);
+            			var fahrMin = Math.round((kelvinMin)*(9/5)-459.67);
+            			var dayIndex = "#d" + i;
+            			var dayOfWeek = new Date(expected[i].dt*1000);
+    					var dayOfWeekStr = (dayOfWeek.toDateString()).substring(0,3);
+    					$(celsiusHigh).html(celsiusMax + "&#8451");
+    					$(fahrHigh).html(fahrMax + "&#8457").hide();
+    					$(celsiusLow).html(celsiusMin + "&#8451");
+    					$(fahrLow).html(fahrMin + "&#8457").hide();
+    					$(dayIndex).html(dayOfWeekStr);
+    					if (icon[expected[i].weather[0].icon]){
+    	        			$(weatherIcon).attr("src", icon[expected[i].weather[0].icon]);
+    	        		}
+    				}
+    				
+    				
+    				
+    			}
+    		});
+				
+        }
+    });	
+});
+
+	
+
+</script>
+</body>
