@@ -1,7 +1,9 @@
 
 
 $(document).ready(function(){
+	//gets location from ip-api
 	var location = "http://ip-api.com/json";
+	//look-up table to select the icon corresponding to current weather and forecast conditions
 	var icon = {
 			"01d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548615/clear_veedxb.png",
 			"01n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548624/clear_night_l8auqv.png",
@@ -22,14 +24,15 @@ $(document).ready(function(){
 			"50d":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548602/fog_ivas6z.png",
 			"50n":"http://res.cloudinary.com/ursularodgers/image/upload/v1497548602/fog_ivas6z.png"	
 		};
+	//first call to get location
 	$.ajax({
 		url:location,
 		dataType:'json',
 		async:false,
 		cache:false,
-		success:function(data){
-			var d = new Date();
-			var lat = data.lat;
+	}).done	(function(data){	//second call to get current weather conditions based on location
+		var d = new Date();
+		var lat = data.lat;
 	    	var lon = data.lon;
 	    	var weather = "http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&appid=8d1dab70d6486ad4b46fe911084f46af";
 	    	var forecast = "http://api.openweathermap.org/data/2.5/forecast/daily?lat=" + lat + "&lon=" + lon + "&cnt=7&appid=8d1dab70d6486ad4b46fe911084f46af";
@@ -40,10 +43,12 @@ $(document).ready(function(){
 	    		dataType:'json',
 	    		async:false,
 	    		cache:false,
-	    		success:function(conditions){
+			}).done(function(conditions){
+				//references the look-up table to get current weather icon
 	    			if (icon[conditions.weather[0].icon]){
 	        			$("#currentWeather").attr("src", icon[conditions.weather[0].icon]);
 	        		}
+				//get current temperatures, plus day max and min
 	    			var kelvin = conditions.main.temp;
 	    			var kelvinMax = conditions.main.temp_max;
 	    			var kelvinMin = conditions.main.temp_min;
@@ -53,6 +58,7 @@ $(document).ready(function(){
 	       	 		var fahr = Math.round((kelvin)*(9/5)-459.67);
 	       	 		var fahrMax = Math.round((kelvinMax)*(9/5)-459.67);
 	       	 		var fahrMin = Math.round((kelvinMin)*(9/5)-459.67);
+				//toggles between celsius and fahrenheit
 	        		$("#fahrenheit").click(function(){
 	        			$("#currentTemp").html(fahr);
 	       	 			$("#fahrenheit").css("color", "black");
@@ -75,17 +81,18 @@ $(document).ready(function(){
 	        		$("#highF").html("HIGH " + fahrMax).hide();
 	        		$("#lowC").html("LOW " + celsiusMin);
 	        		$("#lowF").html("LOW " + fahrMin).hide();
-	        		
-	    		}
-			});//end of first call
+			}).fail (function (){
+				alert("Unable to get location or current weather information at this time. Please try again later.");
+			});//end of first and second call
+			//call to get forecast information
 			$.ajax({
 				url:forecast,
 				dataType: 'json',
 				async:false,
 				cache:false,
-				success: function(lookAhead){
+			}).done (function(lookAhead){
 					var expected = lookAhead.list;
-					
+				//for loop gets max and min temperature for each day in the forecast	
     				for (var i = 1; i < expected.length; i++) {
     					var celsiusHigh = "#day" + i + "highC";
     					var fahrHigh = "#day" + i + "highF";
@@ -95,27 +102,27 @@ $(document).ready(function(){
         				var kelvinMax = expected[i].temp.max;
         				var kelvinMin = expected[i].temp.min;
         				celsiusMax = Math.round(kelvinMax - 273);
-            			var fahrMax = Math.round((kelvinMax)*(9/5)-459.67);
-            			var celsiusMin = Math.round(kelvinMin - 273);
-            			var fahrMin = Math.round((kelvinMin)*(9/5)-459.67);
-            			var dayIndex = "#d" + i;
-            			var dayOfWeek = new Date(expected[i].dt*1000);
+            				var fahrMax = Math.round((kelvinMax)*(9/5)-459.67);
+            				var celsiusMin = Math.round(kelvinMin - 273);
+            				var fahrMin = Math.round((kelvinMin)*(9/5)-459.67);
+            				var dayIndex = "#d" + i;
+            				var dayOfWeek = new Date(expected[i].dt*1000);
     					var dayOfWeekStr = (dayOfWeek.toDateString()).substring(0,3);
+					//jQuery to output temperatures
     					$(celsiusHigh).html(celsiusMax + "&#8451");
     					$(fahrHigh).html(fahrMax + "&#8457").hide();
     					$(celsiusLow).html(celsiusMin + "&#8451");
     					$(fahrLow).html(fahrMin + "&#8457").hide();
     					$(dayIndex).html(dayOfWeekStr);
+					//references the look-up table to get the correct icon
     					if (icon[expected[i].weather[0].icon]){
     	        			$(weatherIcon).attr("src", icon[expected[i].weather[0].icon]);
     	        		}
-    				}
-    				
-    				
-    				
-    			}
-    		});
+    				}	
+    			}).fail(function(){
+    				alert("Unable to get forecast information at this time. Please try again later.");
+    			})
 				
-        }
+        
     });	
 });
